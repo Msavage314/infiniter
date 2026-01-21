@@ -1,2 +1,1 @@
-def hello() -> str:
-    return "Hello from infiniter!"
+from .generator import Generator
