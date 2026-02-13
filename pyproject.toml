@@ -1,7 +1,7 @@
 [project]
 name = "infiniter"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.2.1"
+description = "Improved python iterators"
 readme = "README.md"
 authors = [
     { name = "Michael Savage", email = "savagemichael1707@gmail.com" }

@@ -8,6 +8,11 @@ class SupportsRichComparison(typing.Protocol):
     def __gt__(self, other: typing.Any) -> bool: ...
 
 
+class SupportsSum(typing.Protocol):
+    def __yoadd__(self, other: typing.Any) -> typing.Any: ...
+    def __radd__(self, other: typing.Any) -> typing.Any: ...
+
+
 class InfiniteIteratorError(Exception):
     """Raised when an operation cannot be run on a infinite iterator"""
 
@@ -96,6 +101,18 @@ class Iter[T]:
                 break
         return text
 
+    def __len__(self) -> int:
+        if self._infinite:
+            return -1
+        else:
+            total = 0
+            for i in self.enumerate():
+                total = i[0]
+            return total
+
+    def len(self) -> int:
+        return self.__len__()
+
     def map[U](self, func: typing.Callable[[T], U]) -> Iter[U]:
         """Map each element through a function"""
 
@@ -119,6 +136,18 @@ class Iter[T]:
     def enumerate(self, start: int = 0) -> Iter[tuple[int, T]]:
         """Return a list of tuples of elements with indices"""
         return Iter(enumerate(self._iter, start))
+
+    def chain(self, *iterables: typing.Iterable) -> Iter:
+        """Returns a new iterator with the other items added"""
+
+        def gen():
+            for i in self:
+                yield i
+            for i in iterables:
+                for j in i:
+                    yield j
+
+        return Iter(gen())
 
     def zip(self, *iterables: typing.Iterable) -> Iter[tuple]:
         """Zip with other iterables"""
@@ -146,8 +175,9 @@ class Iter[T]:
 
         return Iter(gen())
 
-    def find(self, value):
-        pass
+    @requires_finite()
+    def sum(self: Iter[SupportsSum]) -> int:
+        return sum(self._iter)
 
     @requires_finite()
     def sort(
