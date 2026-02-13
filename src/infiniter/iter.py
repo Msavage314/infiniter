@@ -175,8 +175,30 @@ class Iter[T]:
 
         return Iter(gen())
 
+    def cumulative(self: Iter[int]) -> Iter[int]:
+        """Return a new iterator that is a total over all elements up to n"""
+
+        def gen():
+            total = 0
+            for i in self:
+                total += i
+                yield total
+
+        return Iter(gen(), infinite=self._infinite)
+
+    def cumulative_average(self: Iter[int]) -> Iter[float]:
+        """Returns a cumulative arithmetic mean"""
+
+        def gen():
+            total = 0
+            for index, value in self.enumerate():
+                total += value
+                yield total / (index + 1)
+
+        return Iter(gen())
+
     @requires_finite()
-    def sum(self: Iter[SupportsSum]) -> int:
+    def sum(self: Iter[SupportsSum]) -> SupportsSum | typing.Literal[0]:
         return sum(self._iter)
 
     @requires_finite()
