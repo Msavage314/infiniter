@@ -1,5 +1,4 @@
 from infiniter import Iter
 
 
-for i in Iter.count().take_while(lambda x: x <= 50):
-    print(i)
+print(Iter([3, 6, 2, 5, 6, 3, 2, 6, 7, 3, 2, 4, 6, 6, 7, 4, 2]))

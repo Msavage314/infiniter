@@ -3,6 +3,11 @@ import typing
 import functools
 
 
+class SupportsRichComparison(typing.Protocol):
+    def __lt__(self, other: typing.Any) -> bool: ...
+    def __gt__(self, other: typing.Any) -> bool: ...
+
+
 class InfiniteIteratorError(Exception):
     """Raised when an operation cannot be run on a infinite iterator"""
 
@@ -71,6 +76,26 @@ class Iter[T]:
         else:
             return self.map(lambda x: x / other)
 
+    def __next__(self) -> T:
+        return next(self._iter)
+
+    def __getitem__(self, index) -> T | None:
+        for i in self.enumerate():
+            if i[0] == index:
+                return i[1]
+
+    def __str__(self) -> str:
+        text = ""
+        for i in self.enumerate():
+            text += str(i[0]).ljust(3)
+            text += "|  "
+            text += str(i[1])
+            text += "\n"
+            if i[0] >= 10:
+                text += "..."
+                break
+        return text
+
     def map[U](self, func: typing.Callable[[T], U]) -> Iter[U]:
         """Map each element through a function"""
 
@@ -121,6 +146,17 @@ class Iter[T]:
 
         return Iter(gen())
 
+    def find(self, value):
+        pass
+
+    @requires_finite()
+    def sort(
+        self: Iter[SupportsRichComparison], key: None = None, reverse: bool = False
+    ) -> Iter:
+        """Returns a new iterator sorted"""
+        return Iter(sorted(self, key=key, reverse=reverse))
+
+    @requires_finite()
     def collect(self) -> list[T]:
         return list(self)
 
@@ -131,12 +167,12 @@ class Iter[T]:
 
     @staticmethod
     def count(start: int = 0, step: int = 1) -> Iter[int]:
-        return Iter(itertools.count(start, step))
+        return Iter(itertools.count(start, step), infinite=True)
 
     @staticmethod
     def cycle(iterable: typing.Iterable[T]) -> Iter[T]:
         """Create an infinite iterator that cycles through the given iterable forever"""
-        return Iter(itertools.cycle(iterable))
+        return Iter(itertools.cycle(iterable), infinite=True)
 
     @staticmethod
     def repeat(value: T, times: int | None = None) -> Iter[T]:
