@@ -1,6 +1,7 @@
 import itertools
 import typing
 import functools
+import math
 
 
 class SupportsRichComparison(typing.Protocol):
@@ -80,6 +81,12 @@ class Iter[T]:
             return self.zip(other).map(lambda pair: pair[0] / pair[1])
         else:
             return self.map(lambda x: x / other)
+
+    def __pow__(self, other) -> Iter[T]:
+        if isinstance(other, Iter):
+            return self.zip(other).map(lambda pair: pair[0] ** pair[1])
+        else:
+            return self.map(lambda x: x**other)
 
     def __next__(self) -> T:
         return next(self._iter)
@@ -234,8 +241,12 @@ class Iter[T]:
             return Iter(itertools.repeat(value), infinite=True)
 
     @staticmethod
-    def square(start: int = 0) -> Iter[int]:
-        return Iter(Iter.count(start).map(lambda x: x**2), infinite=True)
+    def squares(start: int = 0) -> Iter[int]:
+        return Iter.count(start) ** 2
+
+    @staticmethod
+    def cubes(start: int = 0) -> Iter[int]:
+        return Iter.count(start) ** 3
 
     @staticmethod
     def fibonacci(a: int = 1, b: int = 1) -> Iter[int]:
@@ -285,3 +296,32 @@ class Iter[T]:
                 candidate += 2
 
         return Iter(gen(), infinite=True)
+
+    @staticmethod
+    def factorials() -> Iter[int]:
+        """Factorial numbers"""
+
+        def gen():
+            n = 1
+            total = 1
+            while True:
+                total *= n
+                n += 1
+                yield total
+
+        return Iter(gen(), infinite=True)
+
+    @staticmethod
+    def catalan() -> Iter[int]:
+        def gen():
+            for i in itertools.count():
+                yield int(
+                    math.factorial(2 * i) / (math.factorial(i + 1) * math.factorial(i))
+                )
+
+        return Iter(gen())
+
+    @staticmethod
+    def nth_powers(n: int) -> Iter[int]:
+        """Return the natural numbers raised to the power of n"""
+        return Iter.count() ** n

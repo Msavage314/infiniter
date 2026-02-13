@@ -1,5 +1,5 @@
 from infiniter import Iter
 
 
-for i in Iter([1, 2, 3, 4, 5, 6, 7, 8, 9]).cumulative_average().take(50):
+for i in Iter.catalan().take(59):
     print(i)
