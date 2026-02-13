@@ -1,13 +1,5 @@
-import pytest
-from infiniter import generator
+from infiniter import Iter
 
 
-def test_generator():
-    def generate():
-        for i in range(10):
-            yield i
-
-    a = generator.Generator(generate())
-    b = generate()
-    for i in range(10):
-        assert next(a) == next(b)
+for i in Iter.count().take_while(lambda x: x <= 50):
+    print(i)
