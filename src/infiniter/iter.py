@@ -204,6 +204,79 @@ class Iter[T]:
 
         return Iter(gen())
 
+    def combinations(self, length: int) -> Iter[tuple]:
+        """Generates all combinations of length length.
+
+        for infinite iterators, it will yield combinations gradually as they are iterated over
+        """
+
+        def gen():
+            seen = []
+            emitted = set()
+
+            for item in self._iter:
+                seen.append(item)
+
+                # Generate new combinations with this element
+                if len(seen) >= length:
+                    for combo in itertools.combinations(seen, length):
+                        if combo not in emitted:
+                            emitted.add(combo)
+                            yield combo
+
+        return Iter(gen(), infinite=self._infinite)
+
+    def combinations_with_repeats(self, length: int) -> Iter[tuple]:
+        def gen():
+            seen = []
+            emitted = set()
+
+            for item in self._iter:
+                seen.append(item)
+
+                # Generate new combinations with this element
+                if len(seen) >= 1:
+                    for combo in itertools.combinations_with_replacement(seen, length):
+                        if combo not in emitted:
+                            emitted.add(combo)
+                            yield combo
+
+        return Iter(gen(), infinite=self._infinite)
+
+    def permutations(self, length: int | None = None) -> Iter[tuple[T]]:
+        """Generate all permutations from elements seen so far"""
+
+        def gen():
+            seen = []
+            emitted = set()
+
+            for item in self._iter:
+                seen.append(item)
+                perm_len = length if length is not None else len(seen)
+                if len(seen) >= perm_len:
+                    for perm in itertools.permutations(seen, perm_len):
+                        if perm not in emitted:
+                            emitted.add(perm)
+                            yield perm
+
+        return Iter(gen(), infinite=self._infinite)
+
+    def pairwise(self) -> Iter[tuple[T, T]]:
+        """Generate pairs of elements"""
+
+        def gen():
+            iterator = iter(self._iter)
+            try:
+                prev = next(iterator)
+            except StopIteration:
+                return
+
+            for item in iterator:
+                yield (prev, item)
+                prev = item
+
+        return Iter(gen(), infinite=self._infinite)
+
     @requires_finite()
     def sum(self: Iter[SupportsSum]) -> SupportsSum | typing.Literal[0]:
         return sum(self._iter)

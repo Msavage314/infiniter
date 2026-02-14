@@ -1,5 +1,5 @@
 from infiniter import Iter
 
 
-for i in Iter.catalan().take(59):
+for i in Iter.count().take(50).pairwise():
     print(i)
